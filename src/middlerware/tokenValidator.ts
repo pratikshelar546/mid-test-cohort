@@ -5,7 +5,6 @@ import { AUTH_RESPONSE } from "../module/auth/auth.response";
 export const tokenValidator =(req: Request, res: Response, next: NextFunction) => {
     try {
         const { authorization } = req.headers;
-console.log(authorization);
 
         const token = authorization?.split(" ")[1];
         if (!token) {

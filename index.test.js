@@ -374,175 +374,175 @@ describe('GET /auth/me', () => {
 // ============================================
 // CLASS TESTS - POST /class
 // ============================================
-// describe('POST /class', () => {
-//   it('should create a new class as teacher', async () => {
-//     const { token } = await createTeacherAndLogin();
+describe('POST /class', () => {
+  it('should create a new class as teacher', async () => {
+    const { token } = await createTeacherAndLogin();
     
-//     const { status, data } = await request('POST', '/class', {
-//       className: 'Math 101'
-//     }, token);
+    const { status, data } = await request('POST', '/class', {
+      className: 'Math 101'
+    }, token);
 
-//     expect(status).toBe(201);
-//     expect(data.success).toBe(true);
-//     expect(data.data).toHaveProperty('_id');
-//     expect(data.data.className).toBe('Math 101');
-//     expect(data.data).toHaveProperty('teacherId');
-//     expect(data.data.studentIds).toEqual([]);
-//   });
+    expect(status).toBe(201);
+    expect(data.success).toBe(true);
+    expect(data.data).toHaveProperty('_id');
+    expect(data.data.className).toBe('Math 101');
+    expect(data.data).toHaveProperty('teacherId');
+    expect(data.data.studentIds).toEqual([]);
+  });
 
-//   it('should return 403 when student tries to create class', async () => {
-//     const { token } = await createStudentAndLogin();
+  it('should return 403 when student tries to create class', async () => {
+    const { token } = await createStudentAndLogin();
     
-//     const { status, data } = await request('POST', '/class', {
-//       className: 'Math 101'
-//     }, token);
+    const { status, data } = await request('POST', '/class', {
+      className: 'Math 101'
+    }, token);
 
-//     expect(status).toBe(403);
-//     expect(data.success).toBe(false);
-//     expect(data.error).toBe('Forbidden, teacher access required');
-//   });
+    expect(status).toBe(403);
+    expect(data.success).toBe(false);
+    expect(data.error).toBe('Forbidden, teacher access required');
+  });
 
-//   it('should return 401 without token', async () => {
-//     const { status, data } = await request('POST', '/class', {
-//       className: 'Math 101'
-//     });
+  it('should return 401 without token', async () => {
+    const { status, data } = await request('POST', '/class', {
+      className: 'Math 101'
+    });
 
-//     expect(status).toBe(401);
-//     expect(data.success).toBe(false);
-//     expect(data.error).toBe('Unauthorized, token missing or invalid');
-//   });
+    expect(status).toBe(401);
+    expect(data.success).toBe(false);
+    expect(data.error).toBe('Unauthorized, token missing or invalid');
+  });
 
-//   it('should return 400 for missing className', async () => {
-//     const { token } = await createTeacherAndLogin();
+  it('should return 400 for missing className', async () => {
+    const { token } = await createTeacherAndLogin();
     
-//     const { status, data } = await request('POST', '/class', {}, token);
+    const { status, data } = await request('POST', '/class', {}, token);
 
-//     expect(status).toBe(400);
-//     expect(data.success).toBe(false);
-//     expect(data.error).toBe('Invalid request schema');
-//   });
-// });
+    expect(status).toBe(400);
+    expect(data.success).toBe(false);
+    expect(data.error).toBe('Invalid request schema');
+  });
+});
 
 // ============================================
 // CLASS TESTS - POST /class/:id/add-student
 // ============================================
-// describe('POST /class/:id/add-student', () => {
-//   it('should add student to class', async () => {
-//     const { token: teacherToken } = await createTeacherAndLogin();
-//     const { id: studentId } = await createStudentAndLogin();
+describe('POST /class/:id/add-student', () => {
+  it('should add student to class', async () => {
+    const { token: teacherToken } = await createTeacherAndLogin();
+    const { id: studentId } = await createStudentAndLogin();
     
-//     const classRes = await request('POST', '/class', { className: 'Math 101' }, teacherToken);
-//     const classId = classRes.data.data._id;
+    const classRes = await request('POST', '/class', { className: 'Math 101' }, teacherToken);
+    const classId = classRes.data.data._id;
 
-//     const { status, data } = await request('POST', `/class/${classId}/add-student`, {
-//       studentId
-//     }, teacherToken);
+    const { status, data } = await request('POST', `/class/${classId}/add-student`, {
+      studentId
+    }, teacherToken);
 
-//     expect(status).toBe(200);
-//     expect(data.success).toBe(true);
-//     expect(data.data.studentIds).toContain(studentId);
-//   });
+    expect(status).toBe(200);
+    expect(data.success).toBe(true);
+    expect(data.data.studentIds).toContain(studentId);
+  });
 
-//   it('should not duplicate student if already in class', async () => {
-//     const { token: teacherToken } = await createTeacherAndLogin();
-//     const { id: studentId } = await createStudentAndLogin();
+  it('should not duplicate student if already in class', async () => {
+    const { token: teacherToken } = await createTeacherAndLogin();
+    const { id: studentId } = await createStudentAndLogin();
     
-//     const classRes = await request('POST', '/class', { className: 'Math 101' }, teacherToken);
-//     const classId = classRes.data.data._id;
+    const classRes = await request('POST', '/class', { className: 'Math 101' }, teacherToken);
+    const classId = classRes.data.data._id;
 
-//     await request('POST', `/class/${classId}/add-student`, { studentId }, teacherToken);
-//     const { status, data } = await request('POST', `/class/${classId}/add-student`, { studentId }, teacherToken);
+    await request('POST', `/class/${classId}/add-student`, { studentId }, teacherToken);
+    const { status, data } = await request('POST', `/class/${classId}/add-student`, { studentId }, teacherToken);
 
-//     expect(status).toBe(200);
-//     expect(data.data.studentIds.filter(id => id === studentId).length).toBe(1);
-//   });
+    expect(status).toBe(200);
+    expect(data.data.studentIds.filter(id => id === studentId).length).toBe(1);
+  });
 
-//   it('should return 403 when teacher does not own class', async () => {
-//     const { token: teacher1Token } = await createTeacherAndLogin();
-//     const { token: teacher2Token } = await createTeacherAndLogin();
-//     const { id: studentId } = await createStudentAndLogin();
+  it('should return 403 when teacher does not own class', async () => {
+    const { token: teacher1Token } = await createTeacherAndLogin();
+    const { token: teacher2Token } = await createTeacherAndLogin();
+    const { id: studentId } = await createStudentAndLogin();
     
-//     const classRes = await request('POST', '/class', { className: 'Math 101' }, teacher1Token);
-//     const classId = classRes.data.data._id;
+    const classRes = await request('POST', '/class', { className: 'Math 101' }, teacher1Token);
+    const classId = classRes.data.data._id;
 
-//     const { status, data } = await request('POST', `/class/${classId}/add-student`, {
-//       studentId
-//     }, teacher2Token);
+    const { status, data } = await request('POST', `/class/${classId}/add-student`, {
+      studentId
+    }, teacher2Token);
 
-//     expect(status).toBe(403);
-//     expect(data.success).toBe(false);
-//     expect(data.error).toBe('Forbidden, not class teacher');
-//   });
+    expect(status).toBe(403);
+    expect(data.success).toBe(false);
+    expect(data.error).toBe('Forbidden, not class teacher');
+  });
 
-//   it('should return 403 when student tries to add student', async () => {
-//     const { token: teacherToken } = await createTeacherAndLogin();
-//     const { token: studentToken, id: studentId } = await createStudentAndLogin();
+  it('should return 403 when student tries to add student', async () => {
+    const { token: teacherToken } = await createTeacherAndLogin();
+    const { token: studentToken, id: studentId } = await createStudentAndLogin();
     
-//     const classRes = await request('POST', '/class', { className: 'Math 101' }, teacherToken);
-//     const classId = classRes.data.data._id;
+    const classRes = await request('POST', '/class', { className: 'Math 101' }, teacherToken);
+    const classId = classRes.data.data._id;
 
-//     const { status, data } = await request('POST', `/class/${classId}/add-student`, {
-//       studentId
-//     }, studentToken);
+    const { status, data } = await request('POST', `/class/${classId}/add-student`, {
+      studentId
+    }, studentToken);
 
-//     expect(status).toBe(403);
-//     expect(data.success).toBe(false);
-//     expect(data.error).toBe('Forbidden, teacher access required');
-//   });
+    expect(status).toBe(403);
+    expect(data.success).toBe(false);
+    expect(data.error).toBe('Forbidden, teacher access required');
+  });
 
-//   it('should return 404 for non-existent class', async () => {
-//     const { token: teacherToken } = await createTeacherAndLogin();
-//     const { id: studentId } = await createStudentAndLogin();
-//     const fakeClassId = '507f1f77bcf86cd799439011';
+  it('should return 404 for non-existent class', async () => {
+    const { token: teacherToken } = await createTeacherAndLogin();
+    const { id: studentId } = await createStudentAndLogin();
+    const fakeClassId = '507f1f77bcf86cd799439011';
 
-//     const { status, data } = await request('POST', `/class/${fakeClassId}/add-student`, {
-//       studentId
-//     }, teacherToken);
+    const { status, data } = await request('POST', `/class/${fakeClassId}/add-student`, {
+      studentId
+    }, teacherToken);
 
-//     expect(status).toBe(404);
-//     expect(data.success).toBe(false);
-//     expect(data.error).toBe('Class not found');
-//   });
+    expect(status).toBe(404);
+    expect(data.success).toBe(false);
+    expect(data.error).toBe('Class not found');
+  });
 
-//   it('should return 404 for non-existent student', async () => {
-//     const { token: teacherToken } = await createTeacherAndLogin();
+  it('should return 404 for non-existent student', async () => {
+    const { token: teacherToken } = await createTeacherAndLogin();
     
-//     const classRes = await request('POST', '/class', { className: 'Math 101' }, teacherToken);
-//     const classId = classRes.data.data._id;
-//     const fakeStudentId = '507f1f77bcf86cd799439011';
+    const classRes = await request('POST', '/class', { className: 'Math 101' }, teacherToken);
+    const classId = classRes.data.data._id;
+    const fakeStudentId = '507f1f77bcf86cd799439011';
 
-//     const { status, data } = await request('POST', `/class/${classId}/add-student`, {
-//       studentId: fakeStudentId
-//     }, teacherToken);
+    const { status, data } = await request('POST', `/class/${classId}/add-student`, {
+      studentId: fakeStudentId
+    }, teacherToken);
 
-//     expect(status).toBe(404);
-//     expect(data.success).toBe(false);
-//     expect(data.error).toBe('Student not found');
-//   });
+    expect(status).toBe(404);
+    expect(data.success).toBe(false);
+    expect(data.error).toBe('Student not found');
+  });
 
-//   it('should return 400 for missing studentId', async () => {
-//     const { token: teacherToken } = await createTeacherAndLogin();
+  it('should return 400 for missing studentId', async () => {
+    const { token: teacherToken } = await createTeacherAndLogin();
     
-//     const classRes = await request('POST', '/class', { className: 'Math 101' }, teacherToken);
-//     const classId = classRes.data.data._id;
+    const classRes = await request('POST', '/class', { className: 'Math 101' }, teacherToken);
+    const classId = classRes.data.data._id;
 
-//     const { status, data } = await request('POST', `/class/${classId}/add-student`, {}, teacherToken);
+    const { status, data } = await request('POST', `/class/${classId}/add-student`, {}, teacherToken);
 
-//     expect(status).toBe(400);
-//     expect(data.success).toBe(false);
-//     expect(data.error).toBe('Invalid request schema');
-//   });
+    expect(status).toBe(400);
+    expect(data.success).toBe(false);
+    expect(data.error).toBe('Invalid request schema');
+  });
 
-//   it('should return 401 without token', async () => {
-//     const { status, data } = await request('POST', '/class/someid/add-student', {
-//       studentId: 'someid'
-//     });
+  it('should return 401 without token', async () => {
+    const { status, data } = await request('POST', '/class/someid/add-student', {
+      studentId: 'someid'
+    });
 
-//     expect(status).toBe(401);
-//     expect(data.success).toBe(false);
-//     expect(data.error).toBe('Unauthorized, token missing or invalid');
-//   });
-// });
+    expect(status).toBe(401);
+    expect(data.success).toBe(false);
+    expect(data.error).toBe('Unauthorized, token missing or invalid');
+  });
+});
 
 // ============================================
 // CLASS TESTS - GET /class/:id

@@ -3,7 +3,8 @@ import Routes from "../module/routes";
 
 
 const routes =[
-    new Route("/auth",Routes.authRoute)
+    new Route("/auth",Routes.authRoute),
+    new Route("/",Routes.classRoute)
 ]
 
 
