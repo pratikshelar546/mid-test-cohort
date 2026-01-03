@@ -1,12 +1,13 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken"
-import { AUTH_RESPONSE } from "../module/auth/auth.response";
 
 export const tokenValidator =(req: Request, res: Response, next: NextFunction) => {
+    
+    const { authorization } = req.headers;
+    const token = authorization?.includes(" ") 
+    ? authorization.split(" ")[1] 
+    : authorization;
     try {
-        const { authorization } = req.headers;
-
-        const token = authorization?.split(" ")[1];
         if (!token) {
             // throw AUTH_RESPONSE.USER_NOT_FOUND
              return res.status(401).json({
@@ -20,9 +21,14 @@ export const tokenValidator =(req: Request, res: Response, next: NextFunction) =
             id: payload.id,
             role: payload.role
             };
+            console.log(req.user);
+            
         next();
 
     } catch (error) {
-       throw error
+        return res.status(401).json({
+            success: false,
+            error: "Unauthorized, token missing or invalid"
+        })
     }
 }

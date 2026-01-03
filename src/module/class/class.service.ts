@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { RESPONSE } from "../../commans/response";
 import { findUser } from "../auth/auth.service";
 import { CLASS_RESPONSE } from "./class.response";
@@ -21,19 +22,37 @@ export const createClass = async(data:{className:string},userId:string)=>{
     }
 }
 
-export const addStudent = async (classId,data,teacherId)=>{
+export const addStudent = async (classId:string,data:{studentId:string},teacherId:string)=>{
 try {
-   const studentExist = await findUser(data.studentId);
-   if(!studentExist){
-    throw CLASS_RESPONSE.STUDENT_NOT_FOUND
-   }
-
-   const teacherExist = await findUser(teacherId);
+    const studentExist = await findUser(data.studentId);
+    if(!studentExist){
+        console.log("user not found");
+        
+     throw CLASS_RESPONSE.STUDENT_NOT_FOUND
+    }
+    console.log("user found");
+    
+ 
+    const teacherExist = await findUser(teacherId);
    if(!teacherExist){
     throw CLASS_RESPONSE.TEACHER_NOT_FOUND
    }
 
-  const udpatedClass=  await classModel.findByIdAndUpdate(
+   const classExist = await classModel.findOne({
+    _id:classId
+   })
+
+   if(!classExist) throw CLASS_RESPONSE.CLASS_NOT_FOUND
+
+   if(classExist.teacherId.toString() !== teacherId) throw CLASS_RESPONSE.NOT_TEACHER_OF_CLASS
+
+ 
+//    if(checkOwner.studentIds.find((id)=>id===data.studentId)){
+//     throw CLASS_RESPONSE.STUDENT_NOT_FOUND
+
+//    }
+
+  const udpatedClass= await classModel.findByIdAndUpdate(
   classId,
   { $addToSet: { studentIds: data.studentId } }, 
   { new: true }
@@ -45,6 +64,53 @@ if(!udpatedClass){
 
 return udpatedClass
 
+} catch (error) {
+    throw error
+}
+}
+
+export const getClassData = async (id:string,user:{role:string,id:string}) =>{
+try {
+    
+    const classData = await classModel.aggregate([
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(id)
+            }
+        },
+        {
+            $lookup: {
+                from: "user",
+                let: { studentIds: "$studentIds" },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $in: ["$_id", { $ifNull: ["$$studentIds", []] }]
+                            }
+                        }
+                    },
+                    {
+                        $project: {
+                            _id: 1,
+                            name: 1,
+                            email: 1
+                        }
+                    }
+                ],
+                as: "students"
+            }
+        },
+        {
+            $project: {
+                _id:1,
+                className: 1,
+                teacherId: 1,
+                students: 1
+            }
+        }
+    ])
+    return classData
 } catch (error) {
     throw error
 }

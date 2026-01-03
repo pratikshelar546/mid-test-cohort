@@ -12,7 +12,7 @@ export const AUTH_RESPONSE = {
         statusCode:400
     },
     USER_NOT_FOUND:{
-    message:"Unauthorized, token missing or invalid",
-        statusCode:401
+    message:"Student not found",
+        statusCode:404
     }
 }

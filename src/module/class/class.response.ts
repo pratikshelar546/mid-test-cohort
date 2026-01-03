@@ -8,7 +8,11 @@ export const CLASS_RESPONSE = {
         statusCode:404
     },
     CLASS_NOT_FOUND:{
-        message:"Class Not exists",
+        message:"Class not found",
         statusCode:404
+    },
+    NOT_TEACHER_OF_CLASS:{
+        message:"Forbidden, not class teacher",
+        statusCode:403
     }
 }

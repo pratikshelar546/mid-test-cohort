@@ -63,8 +63,6 @@ router.post("/login", async (req: Request, res: Response, next: NextFunction) =>
 
 router.get("/me", tokenValidator, async (req: Request, res: Response) => {
     try {
-        console.log(req.user.id, "hellooo");
-
         const user = await findUser(req.user.id);
 
         if (!user) {
