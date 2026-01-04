@@ -3,22 +3,11 @@ import { tokenValidator } from "../../middlerware/tokenValidator";
 import {  addStudentValidator, classValidator } from "./class.validator";
 import { RESPONSE } from "../../commans/response";
 import { addStudent, createClass, getClassData } from "./class.service";
+import { validateRole } from "../../middlerware/roleValidator";
 
 const router = express.Router();
 
-const validateTeacher =(req:Request,res:Response,next:NextFunction)=>{
-    console.log("here?");
-    
- if(req.user.role !== "teacher"){
-             return res.status(403).json({
-            success: false,
-            error: 'Forbidden, teacher access required'
-        })
-        }else{
-            next()
-        }
-}
-router.post("/",tokenValidator,validateTeacher,async(req:Request,res:Response)=>{
+router.post("/",tokenValidator,validateRole("teacher"),async(req:Request,res:Response)=>{
     try {
         const {success,data} = classValidator.safeParse(req.body);
 
@@ -41,7 +30,7 @@ router.post("/",tokenValidator,validateTeacher,async(req:Request,res:Response)=>
 })
 
 
-router.post("/:id/add-student", tokenValidator,validateTeacher,async ( req:Request,res:Response)=>{
+router.post("/:id/add-student", tokenValidator,validateRole("teacher"),async ( req:Request,res:Response)=>{
     try {
         
         const {success,data} = addStudentValidator.safeParse(req.body);
@@ -67,6 +56,7 @@ router.post("/:id/add-student", tokenValidator,validateTeacher,async ( req:Reque
 
 router.get("/:id", tokenValidator,async (req:Request,res:Response)=>{
 try {
+    
     const {id} = req.params;
     const classData = await getClassData(id,req.user);
 
@@ -82,6 +72,7 @@ try {
     })
 }
 })
+
 
 
 export default router

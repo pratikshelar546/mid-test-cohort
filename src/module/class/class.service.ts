@@ -3,6 +3,7 @@ import { RESPONSE } from "../../commans/response";
 import { findUser } from "../auth/auth.service";
 import { CLASS_RESPONSE } from "./class.response";
 import { classModel } from "./class.schema";
+import { UserModel } from "../auth/auth.schama";
 
 export const createClass = async(data:{className:string},userId:string)=>{
     try {
@@ -25,12 +26,9 @@ export const createClass = async(data:{className:string},userId:string)=>{
 export const addStudent = async (classId:string,data:{studentId:string},teacherId:string)=>{
 try {
     const studentExist = await findUser(data.studentId);
-    if(!studentExist){
-        console.log("user not found");
-        
+    if(!studentExist){        
      throw CLASS_RESPONSE.STUDENT_NOT_FOUND
     }
-    console.log("user found");
     
  
     const teacherExist = await findUser(teacherId);
@@ -70,8 +68,7 @@ return udpatedClass
 }
 
 export const getClassData = async (id:string,user:{role:string,id:string}) =>{
-try {
-    
+try {    
     const classData = await classModel.aggregate([
         {
             $match: {
@@ -80,37 +77,63 @@ try {
         },
         {
             $lookup: {
-                from: "user",
-                let: { studentIds: "$studentIds" },
-                pipeline: [
-                    {
-                        $match: {
-                            $expr: {
-                                $in: ["$_id", { $ifNull: ["$$studentIds", []] }]
-                            }
+              from: "users",
+              let: { studentIds: "$studentIds" },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $in: [
+                        "$_id",
+                        {
+                          $map: {
+                            input: { $ifNull: ["$$studentIds", []] },
+                            as: "sid",
+                            in: { $toObjectId: "$$sid" }
+                          }
                         }
-                    },
-                    {
-                        $project: {
-                            _id: 1,
-                            name: 1,
-                            email: 1
-                        }
+                      ]
                     }
-                ],
-                as: "students"
+                  }
+                },
+                {
+                  $project: {
+                    _id: 1,
+                    name: 1,
+                    email: 1
+                  }
+                }
+              ],
+              as: "students"
             }
         },
         {
             $project: {
-                _id:1,
+                _id: 1,
                 className: 1,
                 teacherId: 1,
                 students: 1
             }
         }
-    ])
-    return classData
+    ]);
+
+    if(!classData[0]){
+        throw CLASS_RESPONSE.CLASS_NOT_FOUND
+    }
+
+    if(user.role==="teacher"){
+        const isOwner = classData[0].teacherId.equals(user.id);
+        if(!isOwner){            
+            throw CLASS_RESPONSE.NOT_TEACHER_OF_CLASS
+        }
+    }else if(user.role ==="student"){
+    const isStundent = classData[0].students.find((s)=>s._id.equals(user.id));
+    
+    if(!isStundent){
+      throw CLASS_RESPONSE.NOT_STUDENT_OF_CLASS
+    }
+    }
+    return classData[0]
 } catch (error) {
     throw error
 }

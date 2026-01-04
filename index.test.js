@@ -318,7 +318,6 @@ describe('GET /auth/me', () => {
     const { token, email } = await createStudentAndLogin();
     
     const { status, data } = await request('GET', '/auth/me', null, token);
-    console.log(status,data,"hello",token);
     
 
     expect(status).toBe(200);
@@ -547,129 +546,129 @@ describe('POST /class/:id/add-student', () => {
 // ============================================
 // CLASS TESTS - GET /class/:id
 // ============================================
-// describe('GET /class/:id', () => {
-//   it('should return class details for owning teacher', async () => {
-//     const { token: teacherToken } = await createTeacherAndLogin();
-//     const { id: studentId } = await createStudentAndLogin();
+describe('GET /class/:id', () => {
+  it('should return class details for owning teacher', async () => {
+    const { token: teacherToken } = await createTeacherAndLogin();
+    const { id: studentId } = await createStudentAndLogin();
     
-//     const classRes = await request('POST', '/class', { className: 'Math 101' }, teacherToken);
-//     const classId = classRes.data.data._id;
-//     await request('POST', `/class/${classId}/add-student`, { studentId }, teacherToken);
+    const classRes = await request('POST', '/class', { className: 'Math 101' }, teacherToken);
+    const classId = classRes.data.data._id;
+    await request('POST', `/class/${classId}/add-student`, { studentId }, teacherToken);
 
-//     const { status, data } = await request('GET', `/class/${classId}`, null, teacherToken);
+    const { status, data } = await request('GET', `/class/${classId}`, null, teacherToken);
 
-//     expect(status).toBe(200);
-//     expect(data.success).toBe(true);
-//     expect(data.data._id).toBe(classId);
-//     expect(data.data.className).toBe('Math 101');
-//     expect(data.data.students).toHaveLength(1);
-//     expect(data.data.students[0]).toHaveProperty('_id');
-//     expect(data.data.students[0]).toHaveProperty('name');
-//     expect(data.data.students[0]).toHaveProperty('email');
-//   });
+    expect(status).toBe(200);
+    expect(data.success).toBe(true);
+    expect(data.data._id).toBe(classId);
+    expect(data.data.className).toBe('Math 101');
+    expect(data.data.students).toHaveLength(1);
+    expect(data.data.students[0]).toHaveProperty('_id');
+    expect(data.data.students[0]).toHaveProperty('name');
+    expect(data.data.students[0]).toHaveProperty('email');
+  });
 
-//   it('should return class details for enrolled student', async () => {
-//     const { token: teacherToken } = await createTeacherAndLogin();
-//     const { token: studentToken, id: studentId } = await createStudentAndLogin();
+  it('should return class details for enrolled student', async () => {
+    const { token: teacherToken } = await createTeacherAndLogin();
+    const { token: studentToken, id: studentId } = await createStudentAndLogin();
     
-//     const classRes = await request('POST', '/class', { className: 'Math 101' }, teacherToken);
-//     const classId = classRes.data.data._id;
-//     await request('POST', `/class/${classId}/add-student`, { studentId }, teacherToken);
+    const classRes = await request('POST', '/class', { className: 'Math 101' }, teacherToken);
+    const classId = classRes.data.data._id;
+    await request('POST', `/class/${classId}/add-student`, { studentId }, teacherToken);
 
-//     const { status, data } = await request('GET', `/class/${classId}`, null, studentToken);
+    const { status, data } = await request('GET', `/class/${classId}`, null, studentToken);
 
-//     expect(status).toBe(200);
-//     expect(data.success).toBe(true);
-//     expect(data.data.className).toBe('Math 101');
-//   });
+    expect(status).toBe(200);
+    expect(data.success).toBe(true);
+    expect(data.data.className).toBe('Math 101');
+  });
 
-//   it('should return 403 for non-owning teacher', async () => {
-//     const { token: teacher1Token } = await createTeacherAndLogin();
-//     const { token: teacher2Token } = await createTeacherAndLogin();
+  it('should return 403 for non-owning teacher', async () => {
+    const { token: teacher1Token } = await createTeacherAndLogin();
+    const { token: teacher2Token } = await createTeacherAndLogin();
     
-//     const classRes = await request('POST', '/class', { className: 'Math 101' }, teacher1Token);
-//     const classId = classRes.data.data._id;
+    const classRes = await request('POST', '/class', { className: 'Math 101' }, teacher1Token);
+    const classId = classRes.data.data._id;
 
-//     const { status, data } = await request('GET', `/class/${classId}`, null, teacher2Token);
+    const { status, data } = await request('GET', `/class/${classId}`, null, teacher2Token);
 
-//     expect(status).toBe(403);
-//     expect(data.success).toBe(false);
-//     expect(data.error).toBe('Forbidden, not class teacher');
-//   });
+    expect(status).toBe(403);
+    expect(data.success).toBe(false);
+    expect(data.error).toBe('Forbidden, not class teacher');
+  });
 
-//   it('should return 403 for non-enrolled student', async () => {
-//     const { token: teacherToken } = await createTeacherAndLogin();
-//     const { token: studentToken } = await createStudentAndLogin();
+  it('should return 403 for non-enrolled student', async () => {
+    const { token: teacherToken } = await createTeacherAndLogin();
+    const { token: studentToken } = await createStudentAndLogin();
     
-//     const classRes = await request('POST', '/class', { className: 'Math 101' }, teacherToken);
-//     const classId = classRes.data.data._id;
+    const classRes = await request('POST', '/class', { className: 'Math 101' }, teacherToken);
+    const classId = classRes.data.data._id;
 
-//     const { status, data } = await request('GET', `/class/${classId}`, null, studentToken);
+    const { status, data } = await request('GET', `/class/${classId}`, null, studentToken);
 
-//     expect(status).toBe(403);
-//     expect(data.success).toBe(false);
-//     expect(data.error).toBe('Forbidden, not class teacher');
-//   });
+    expect(status).toBe(403);
+    expect(data.success).toBe(false);
+    expect(data.error).toBe('Forbidden, not class student');
+  });
 
-//   it('should return 404 for non-existent class', async () => {
-//     const { token: teacherToken } = await createTeacherAndLogin();
-//     const fakeClassId = '507f1f77bcf86cd799439011';
+  it('should return 404 for non-existent class', async () => {
+    const { token: teacherToken } = await createTeacherAndLogin();
+    const fakeClassId = '507f1f77bcf86cd799439011';
 
-//     const { status, data } = await request('GET', `/class/${fakeClassId}`, null, teacherToken);
+    const { status, data } = await request('GET', `/class/${fakeClassId}`, null, teacherToken);
 
-//     expect(status).toBe(404);
-//     expect(data.success).toBe(false);
-//     expect(data.error).toBe('Class not found');
-//   });
+    expect(status).toBe(404);
+    expect(data.success).toBe(false);
+    expect(data.error).toBe('Class not found');
+  });
 
-//   it('should return 401 without token', async () => {
-//     const { status, data } = await request('GET', '/class/someid');
+  it('should return 401 without token', async () => {
+    const { status, data } = await request('GET', '/class/someid');
 
-//     expect(status).toBe(401);
-//     expect(data.success).toBe(false);
-//     expect(data.error).toBe('Unauthorized, token missing or invalid');
-//   });
-// });
+    expect(status).toBe(401);
+    expect(data.success).toBe(false);
+    expect(data.error).toBe('Unauthorized, token missing or invalid');
+  });
+});
 
 // ============================================
 // STUDENTS TESTS - GET /students
 // ============================================
-// describe('GET /students', () => {
-//   it('should return all students for teacher', async () => {
-//     const { token: teacherToken } = await createTeacherAndLogin();
-//     await createStudentAndLogin();
-//     await createStudentAndLogin();
+describe('GET /students', () => {
+  it('should return all students for teacher', async () => {
+    const { token: teacherToken } = await createTeacherAndLogin();
+    await createStudentAndLogin();
+    await createStudentAndLogin();
 
-//     const { status, data } = await request('GET', '/students', null, teacherToken);
+    const { status, data } = await request('GET', '/students', null, teacherToken);
 
-//     expect(status).toBe(200);
-//     expect(data.success).toBe(true);
-//     expect(Array.isArray(data.data)).toBe(true);
-//     expect(data.data.length).toBeGreaterThanOrEqual(2);
-//     expect(data.data[0]).toHaveProperty('_id');
-//     expect(data.data[0]).toHaveProperty('name');
-//     expect(data.data[0]).toHaveProperty('email');
-//     expect(data.data[0]).not.toHaveProperty('password');
-//   });
+    expect(status).toBe(200);
+    expect(data.success).toBe(true);
+    expect(Array.isArray(data.data)).toBe(true);
+    expect(data.data.length).toBeGreaterThanOrEqual(2);
+    expect(data.data[0]).toHaveProperty('_id');
+    expect(data.data[0]).toHaveProperty('name');
+    expect(data.data[0]).toHaveProperty('email');
+    expect(data.data[0]).not.toHaveProperty('password');
+  });
 
-//   it('should return 403 when student tries to get students', async () => {
-//     const { token: studentToken } = await createStudentAndLogin();
+  it('should return 403 when student tries to get students', async () => {
+    const { token: studentToken } = await createStudentAndLogin();
 
-//     const { status, data } = await request('GET', '/students', null, studentToken);
+    const { status, data } = await request('GET', '/students', null, studentToken);
 
-//     expect(status).toBe(403);
-//     expect(data.success).toBe(false);
-//     expect(data.error).toBe('Forbidden, teacher access required');
-//   });
+    expect(status).toBe(403);
+    expect(data.success).toBe(false);
+    expect(data.error).toBe('Forbidden, teacher access required');
+  });
 
-//   it('should return 401 without token', async () => {
-//     const { status, data } = await request('GET', '/students');
+  it('should return 401 without token', async () => {
+    const { status, data } = await request('GET', '/students');
 
-//     expect(status).toBe(401);
-//     expect(data.success).toBe(false);
-//     expect(data.error).toBe('Unauthorized, token missing or invalid');
-//   });
-// });
+    expect(status).toBe(401);
+    expect(data.success).toBe(false);
+    expect(data.error).toBe('Unauthorized, token missing or invalid');
+  });
+});
 
 // ============================================
 // ATTENDANCE HTTP TESTS - POST /attendance/start
